@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment & secret files
+.env
+*.env
+
+# Docker & database volumes
+mysql_data/
+volumes/
+docker-volumes/
+
+# Airflow logs & plugins
+airflow_logs/
+airflow_plugins/
+logs/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

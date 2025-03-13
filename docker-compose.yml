@@ -1,0 +1,116 @@
+version: '3.1'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - docker_kafka
+    restart: always
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://192.168.43.213:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    depends_on:
+      - zookeeper
+    networks:
+      - docker_kafka
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Pramuka123@
+      MYSQL_DATABASE: tugas_akhir
+    ports:
+      - "3306:3306"
+    networks:
+      - docker_kafka
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  airflow-init:
+    image: apache/airflow:latest
+    container_name: airflow-init
+    depends_on:
+      - mysql
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql+pymysql://root:Pramuka123%40@mysql:3306/tugas_akhir
+    command: bash -c "airflow db init"
+    networks:
+      - docker_kafka
+    volumes:
+      - ./dags:/opt/airflow/dags 
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Gunakan Dockerfile custom yang ada di direktori ini
+    container_name: airflow-webserver
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - airflow-init
+    networks:
+      - docker_kafka
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql+pymysql://root:Pramuka123%40@mysql:3306/tugas_akhir
+    volumes:
+      - ./dags:/opt/airflow/dags 
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    command: webserver
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Gunakan Dockerfile custom yang sama
+    container_name: airflow-scheduler
+    restart: always
+    depends_on:
+      - mysql
+      - airflow-init
+    networks:
+      - docker_kafka
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql+pymysql://root:Pramuka123%40@mysql:3306/tugas_akhir
+    volumes:
+      - ./dags:/opt/airflow/dags 
+      - airflow_logs:/opt/airflow/logs
+      - airflow_plugins:/opt/airflow/plugins
+    command: scheduler
+
+networks:
+  docker_kafka:
+
+volumes:
+  mysql_data:
+  airflow_dags:
+  airflow_logs:
+  airflow_plugins:

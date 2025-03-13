@@ -1,0 +1,4 @@
+pada hari pertama 
+1. masih belum bisa menjalankan kafka didocker
+2. coba perhatikan lognya 
+3. jika belum bisa coba ganti dari pembahasan video yang lain 
