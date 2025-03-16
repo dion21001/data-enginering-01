@@ -39,8 +39,8 @@ services:
     container_name: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: Pramuka123@
-      MYSQL_DATABASE: tugas_akhir
+      MYSQL_ROOT_PASSWORD: -
+      MYSQL_DATABASE: -
     ports:
       - "3306:3306"
     networks:
@@ -55,7 +55,7 @@ services:
       - mysql
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql+pymysql://root:Pramuka123%40@mysql:3306/tugas_akhir
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: -
     command: bash -c "airflow db init"
     networks:
       - docker_kafka
@@ -79,7 +79,7 @@ services:
       - docker_kafka
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql+pymysql://root:Pramuka123%40@mysql:3306/tugas_akhir
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: -
     volumes:
       - ./dags:/opt/airflow/dags 
       - airflow_logs:/opt/airflow/logs
@@ -99,7 +99,7 @@ services:
       - docker_kafka
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: mysql+pymysql://root:Pramuka123%40@mysql:3306/tugas_akhir
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: -
     volumes:
       - ./dags:/opt/airflow/dags 
       - airflow_logs:/opt/airflow/logs
